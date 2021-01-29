@@ -21,6 +21,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <mutex>
 
 #include <C2Buffer.h>
 #include <C2Component.h>
@@ -265,6 +266,7 @@ private:
 
     void feedInputBufferIfAvailable();
     void feedInputBufferIfAvailableInternal();
+    void queueDummyWork();
     status_t queueInputBufferInternal(sp<MediaCodecBuffer> buffer,
                                       std::shared_ptr<C2LinearBlock> encryptedBlock = nullptr,
                                       size_t blockSize = 0);
@@ -343,6 +345,7 @@ private:
     std::once_flag mRenderWarningFlag;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     uint64_t mLastInputBufferAvailableTs;
     std::mutex mTsLock;
@@ -351,6 +354,11 @@ private:
     bool mNeedEmptyWork;
 
 >>>>>>> 0002b5e7d8 (Codec2: guard the dummy work signal to lahaina only)
+=======
+    uint64_t mLastInputBufferAvailableTs;
+    std::mutex mTsLock;
+
+>>>>>>> 8fa5e5024f (Codec2: queue a empty work to HAL to wake up allocation thread)
     sp<ICrypto> mCrypto;
     sp<IDescrambler> mDescrambler;
 
