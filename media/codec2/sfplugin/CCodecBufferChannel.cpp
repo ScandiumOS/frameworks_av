@@ -150,6 +150,13 @@ CCodecBufferChannel::CCodecBufferChannel(
       mMetaMode(MODE_NONE),
       mInputMetEos(false),
       mSendEncryptedInfoBuffer(false) {
+    char board_platform[PROPERTY_VALUE_MAX];
+    property_get("ro.board.platform", board_platform, "");
+    mNeedEmptyWork = false;
+    if (!strncmp(board_platform, "lahaina", 7)) {
+        mNeedEmptyWork = true;
+        ALOGV("CCodecBufferChannel: going to queue empty work for lahaina.");
+    }
     mOutputSurface.lock()->maxDequeueBuffers = kSmoothnessFactor + kRenderingDepth;
     {
         Mutexed<Input>::Locked input(mInput);
@@ -710,6 +717,26 @@ void CCodecBufferChannel::feedInputBufferIfAvailable() {
         return;
     }
     feedInputBufferIfAvailableInternal();
+<<<<<<< HEAD
+=======
+
+    // limit this WA to qc hw decoder only
+    // if feedInputBufferIfAvailableInternal() successfully (has available input buffer),
+    // mLastInputBufferAvailableTs would be updated. otherwise, not input buffer available
+    if (mNeedEmptyWork) {
+        std::regex pattern{"c2\\.qti\\..*\\.decoder.*"};
+        if (std::regex_match(mComponentName, pattern)) {
+            std::lock_guard<std::mutex> tsLock(mTsLock);
+            uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    PipelineWatcher::Clock::now().time_since_epoch()).count();
+            if (now - mLastInputBufferAvailableTs > kPipelinePausedTimeoutMs) {
+                ALOGV("long time elapsed since last input available, let's queue a specific work to "
+                        "HAL to notify something");
+                queueDummyWork();
+            }
+        }
+    }
+>>>>>>> 0002b5e7d8 (Codec2: guard the dummy work signal to lahaina only)
 }
 
 void CCodecBufferChannel::feedInputBufferIfAvailableInternal() {
@@ -1566,6 +1593,17 @@ status_t CCodecBufferChannel::requestInitialInputBuffers(
         clientInputBuffers.erase(minIndex);
     }
 
+<<<<<<< HEAD
+=======
+    if (mNeedEmptyWork && !clientInputBuffers.empty()) {
+        {
+            std::lock_guard<std::mutex> tsLock(mTsLock);
+            mLastInputBufferAvailableTs = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    PipelineWatcher::Clock::now().time_since_epoch()).count();
+        }
+    }
+
+>>>>>>> 0002b5e7d8 (Codec2: guard the dummy work signal to lahaina only)
     for (const auto &[index, buffer] : clientInputBuffers) {
         mCallback->onInputBufferAvailable(index, buffer);
     }
@@ -1724,6 +1762,12 @@ bool CCodecBufferChannel::handleWork(
 
     if (work->result == C2_OK){
         notifyClient = true;
+<<<<<<< HEAD
+=======
+    } else if (mNeedEmptyWork && work->result == C2_OMITTED) {
+        ALOGV("[%s] empty work returned; omitted.", mName);
+        return false; // omitted
+>>>>>>> 0002b5e7d8 (Codec2: guard the dummy work signal to lahaina only)
     } else if (work->result == C2_NOT_FOUND) {
         ALOGD("[%s] flushed work; ignored.", mName);
     } else {

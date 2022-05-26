@@ -342,6 +342,15 @@ private:
     std::atomic_bool mInputMetEos;
     std::once_flag mRenderWarningFlag;
 
+<<<<<<< HEAD
+=======
+    uint64_t mLastInputBufferAvailableTs;
+    std::mutex mTsLock;
+
+    // whether the HAL needs a dummy work
+    bool mNeedEmptyWork;
+
+>>>>>>> 0002b5e7d8 (Codec2: guard the dummy work signal to lahaina only)
     sp<ICrypto> mCrypto;
     sp<IDescrambler> mDescrambler;
 
