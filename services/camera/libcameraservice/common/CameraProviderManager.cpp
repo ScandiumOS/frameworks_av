@@ -2028,7 +2028,12 @@ status_t CameraProviderManager::ProviderInfo::dump(int fd, const Vector<String16
             dprintf(fd, "    Orientation: %d\n", info.orientation);
         }
         CameraMetadata info2;
+<<<<<<< HEAD
         res = device->getCameraCharacteristics(true /*overrideForPerfClass*/, &info2);
+=======
+        res = device->getCameraCharacteristics(true /*overrideForPerfClass*/, &info2,
+                /*overrideToPortrait*/false);
+>>>>>>> 925abedb3a (CameraService: Disable overrideToPortrait for dumpsys media.camera.)
         if (res == INVALID_OPERATION) {
             dprintf(fd, "  API2 not directly supported\n");
         } else if (res != OK) {
@@ -2369,6 +2374,40 @@ status_t CameraProviderManager::ProviderInfo::DeviceInfo3::getCameraCharacterist
         *characteristics = mCameraCharacteristics;
     }
 
+<<<<<<< HEAD
+=======
+    if (overrideToPortrait) {
+        const auto &lensFacingEntry = characteristics->find(ANDROID_LENS_FACING);
+        const auto &sensorOrientationEntry = characteristics->find(ANDROID_SENSOR_ORIENTATION);
+        uint8_t lensFacing = lensFacingEntry.data.u8[0];
+        if (lensFacingEntry.count > 0 && sensorOrientationEntry.count > 0) {
+            int32_t sensorOrientation = sensorOrientationEntry.data.i32[0];
+            int32_t newSensorOrientation = sensorOrientation;
+
+            if (sensorOrientation == 0 || sensorOrientation == 180) {
+                if (lensFacing == ANDROID_LENS_FACING_FRONT) {
+                    newSensorOrientation = (360 + sensorOrientation - 90) % 360;
+                } else if (lensFacing == ANDROID_LENS_FACING_BACK) {
+                    newSensorOrientation = (360 + sensorOrientation + 90) % 360;
+                }
+            }
+
+            if (newSensorOrientation != sensorOrientation) {
+                ALOGV("%s: Update ANDROID_SENSOR_ORIENTATION for lens facing %d "
+                        "from %d to %d", __FUNCTION__, lensFacing, sensorOrientation,
+                        newSensorOrientation);
+                characteristics->update(ANDROID_SENSOR_ORIENTATION, &newSensorOrientation, 1);
+            }
+        }
+
+        if (characteristics->exists(ANDROID_INFO_DEVICE_STATE_ORIENTATIONS)) {
+            ALOGV("%s: Erasing ANDROID_INFO_DEVICE_STATE_ORIENTATIONS for lens facing %d",
+                    __FUNCTION__, lensFacing);
+            characteristics->erase(ANDROID_INFO_DEVICE_STATE_ORIENTATIONS);
+        }
+    }
+
+>>>>>>> 925abedb3a (CameraService: Disable overrideToPortrait for dumpsys media.camera.)
     return OK;
 }
 
