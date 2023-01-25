@@ -695,7 +695,11 @@ camera_status_t ACameraManager::getCameraCharacteristics(
     CameraMetadata rawMetadata;
     int targetSdkVersion = android_get_application_target_sdk_version();
     binder::Status serviceRet = cs->getCameraCharacteristics(String16(cameraIdStr),
+<<<<<<< HEAD
             targetSdkVersion, &rawMetadata);
+=======
+            targetSdkVersion, /*overrideToPortrait*/false, &rawMetadata);
+>>>>>>> 45ec7c2e4c (Camera NDK: Do not enable overrideToPortrait in ACameraManager)
     if (!serviceRet.isOk()) {
         switch(serviceRet.serviceSpecificErrorCode()) {
             case hardware::ICameraService::ERROR_DISCONNECTED:
@@ -747,7 +751,11 @@ ACameraManager::openCamera(
     binder::Status serviceRet = cs->connectDevice(
             callbacks, String16(cameraId), String16(""), {},
             hardware::ICameraService::USE_CALLING_UID, /*oomScoreOffset*/0,
+<<<<<<< HEAD
             targetSdkVersion, /*out*/&deviceRemote);
+=======
+            targetSdkVersion, /*overrideToPortrait*/false, /*out*/&deviceRemote);
+>>>>>>> 45ec7c2e4c (Camera NDK: Do not enable overrideToPortrait in ACameraManager)
 
     if (!serviceRet.isOk()) {
         ALOGE("%s: connect camera device failed: %s", __FUNCTION__, serviceRet.toString8().string());
