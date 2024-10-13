@@ -83,13 +83,9 @@ interface ICameraService
             int cameraId,
             String opPackageName,
             int clientUid, int clientPid,
-<<<<<<< HEAD
-            int targetSdkVersion);
-=======
             int targetSdkVersion,
             boolean overrideToPortrait,
             boolean forceSlowJpegMode);
->>>>>>> 4094e1f166 (DO NOT MERGE Force slowJpegMode on certain camera1 apps)
 
     /**
      * Open a camera device through the new camera API
